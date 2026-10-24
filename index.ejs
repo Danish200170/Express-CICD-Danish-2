@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Full-Stack Demo</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <span class="eyebrow">DEVOPS ASSIGNMENT</span>
+      <h1>Full-stack form demo</h1>
+      <p>A Node.js + Express frontend sends your form to a Python Flask API through Docker Compose.</p>
+      <div class="stack"><span>Node.js / Express</span><span class="arrow">→</span><span>Flask API</span></div>
+    </header>
+
+    <% if (result) { %>
+      <section class="notice success" role="status">
+        <strong><%= result.message %></strong>
+        <p>Processed by: <%= result.service %></p>
+        <p>Submission ID: <%= result.submission_id %></p>
+        <div class="submitted"><span>Name</span><b><%= result.data.name %></b><span>Email</span><b><%= result.data.email %></b><span>Message</span><b><%= result.data.message %></b></div>
+      </section>
+    <% } %>
+    <% if (error) { %>
+      <section class="notice error" role="alert"><strong>Could not submit the form</strong><p><%= error %></p></section>
+    <% } %>
+
+    <section class="panel">
+      <h2>Contact form</h2>
+      <p class="muted">Enter sample data to test the frontend-to-backend connection.</p>
+      <form action="/submit" method="POST">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" maxlength="100" required value="<%= form.name || '' %>" placeholder="e.g. Danish Qureshi">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" maxlength="254" required value="<%= form.email || '' %>" placeholder="you@example.com">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="4" maxlength="1000" required placeholder="Write a short message"><%= form.message || '' %></textarea>
+        <button type="submit">Send to Flask API <span aria-hidden="true">↗</span></button>
+      </form>
+    </section>
+    <footer><span class="dot"></span> Frontend health endpoint: <code>/health</code> · Local URL: <code>http://localhost:3000</code></footer>
+  </main>
+</body>
+</html>
