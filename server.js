@@ -1,37 +1,57 @@
-const express = require("express");
+const express = require('express');
+const axios = require('axios');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const PORT = Number(process.env.PORT || 3000);
+// Compose service DNS name; localhost inside this container means the frontend itself.
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
 
-app.use(express.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+app.set('views', `${__dirname}/views`);
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(`${__dirname}/public`));
 
-app.post("/submit", async (req, res) => {
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', service: 'frontend' });
+});
+
+app.get('/', (_req, res) => {
+  res.render('index', { result: null, error: null, form: {} });
+});
+
+app.post('/submit', async (req, res) => {
+  const form = {
+    name: String(req.body.name || '').trim(),
+    email: String(req.body.email || '').trim(),
+    message: String(req.body.message || '').trim()
+  };
+
+  if (!form.name || !form.email || !form.message) {
+    return res.status(400).render('index', {
+      result: null,
+      error: 'Please fill in all fields before submitting.',
+      form
+    });
+  }
+
   try {
-    const response = await fetch(`${BACKEND_URL}/api/submit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body)
+    const response = await axios.post(`${BACKEND_URL}/api/submit`, form, {
+      timeout: 5000,
+      headers: { 'Content-Type': 'application/json' }
     });
-
-    const data = await response.json();
-    res.status(response.status).json(data);
-  } catch (error) {
-    res.status(502).json({
-      success: false,
-      message: "Frontend could not connect to the Flask backend.",
-      error: error.message
+    return res.status(200).render('index', {
+      result: response.data,
+      error: null,
+      form
     });
+  } catch (err) {
+    const backendMessage = err.response?.data?.error;
+    const message = backendMessage || 'The Flask backend could not be reached. Check that both Compose services are running.';
+    return res.status(502).render('index', { result: null, error: message, form });
   }
 });
 
-app.get("/health", (_req, res) => {
-  res.json({ service: "Express frontend", status: "running" });
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Frontend running on http://localhost:${PORT}`);
-  console.log(`Flask backend target: ${BACKEND_URL}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Frontend listening on port ${PORT}; backend URL: ${BACKEND_URL}`);
 });

@@ -1,13 +1,16 @@
 {
-  "name": "jenkins-cicd-express-frontend",
+  "name": "docker-assignment-frontend",
   "version": "1.0.0",
-  "description": "Express frontend for the Jenkins CI/CD assignment",
+  "private": true,
+  "description": "Node.js and Express frontend for a Docker Compose full-stack demo",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --check server.js"
+    "dev": "node --watch server.js"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "axios": "^1.8.4",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
   }
 }
